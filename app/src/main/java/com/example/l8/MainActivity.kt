@@ -20,10 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             L8Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    MainScreen()
                 }
             }
         }
@@ -31,17 +28,25 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MainScreen(modifier: Modifier = Modifier) {
+    // Здесь будут демо-компоненты
+}
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+        GestureDemoTheme {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                MainScreen()
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    L8Theme {
-        Greeting("Android")
+    GestureDemoTheme {
+        MainScreen()
     }
 }
