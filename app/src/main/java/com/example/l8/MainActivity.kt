@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -26,26 +27,32 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.l8.ui.theme.L8Theme
 import kotlin.math.roundToInt
 
@@ -56,24 +63,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             L8Theme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MainScreen()
+                    MultiTouchDemo()
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    MultiTouchDemo(modifier)
-}
-
-@Composable
-fun MultiTouchDemo(modifier: Modifier = Modifier) {
+fun MultiTouchDemo(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     var scale by remember { mutableStateOf(1f) }
     var angle by remember { mutableStateOf(0f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var clickCount by remember { mutableIntStateOf(0) }
 
     val state = rememberTransformableState { scaleChange, offsetChange, rotationChange ->
         scale *= scaleChange
@@ -82,8 +87,11 @@ fun MultiTouchDemo(modifier: Modifier = Modifier) {
     }
 
     Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
-        Box(
-            Modifier
+        Image(
+            painter = painterResource(id = R.drawable.vacation),
+            contentDescription = "Transformable image",
+            modifier = Modifier
+                .size(200.dp)
                 .graphicsLayer(
                     scaleX = scale,
                     scaleY = scale,
@@ -92,8 +100,35 @@ fun MultiTouchDemo(modifier: Modifier = Modifier) {
                     translationY = offset.y
                 )
                 .transformable(state = state)
-                .background(Color.Blue)
-                .size(100.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            clickCount++
+                            onClick()
+                        },
+                        onDoubleTap = {
+                            // Сброс трансформации
+                            scale = 1f
+                            angle = 0f
+                            offset = Offset.Zero
+                        },
+                        onLongPress = {
+                            // Увеличение на 20% (умножаем на 1.2f)
+                            scale *= 1.2f
+                        }
+                    )
+                }
+                .clip(RoundedCornerShape(16.dp))
+        )
+
+        Text(
+            text = "Clicks: $clickCount | Long press to zoom +20%",
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
