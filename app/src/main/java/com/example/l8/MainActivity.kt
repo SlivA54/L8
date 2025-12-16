@@ -11,6 +11,8 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -53,26 +55,29 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    PointerInputDrag(modifier)
+    ScrollableModifier(modifier)
 }
 
 @Composable
-fun PointerInputDrag(modifier: Modifier = Modifier) {
-    var xOffset by remember { mutableStateOf(0f) }
-    var yOffset by remember { mutableStateOf(0f) }
+fun ScrollableModifier(modifier: Modifier = Modifier) {
+    var offset by remember { mutableStateOf(0f) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier
+            .fillMaxSize()
+            .scrollable(
+                orientation = Orientation.Vertical,
+                state = rememberScrollableState { distance ->
+                    offset += distance
+                    distance
+                }
+            )
+    ) {
         Box(
             Modifier
-                .offset { IntOffset(xOffset.roundToInt(), yOffset.roundToInt()) }
-                .background(Color.Blue)
-                .size(100.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures { _, distance ->
-                        xOffset += distance.x
-                        yOffset += distance.y
-                    }
-                }
+                .size(90.dp)
+                .offset { IntOffset(0, offset.roundToInt()) }
+                .background(Color.Red)
         )
     }
 }
